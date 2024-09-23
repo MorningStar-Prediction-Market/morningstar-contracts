@@ -1,0 +1,109 @@
+@startuml
+skinparam linetype ortho
+skinparam arrowColor #555555
+skinparam activityBorderColor black
+skinparam activityBackgroundColor #EEEEEE
+skinparam shadowing false
+
+actor "User" as User
+
+rectangle "Frontend Interface\n(Web/App)" as Frontend
+
+component "Market Factory Contract" as MarketFactory
+
+component "Market Contract" as MarketContract
+note right of MarketContract
+    - Individual Prediction Markets
+    - Utilizes Conditional Token Framework (CTF)
+end note
+
+component "Outcome Tokens\n(Conditional Tokens)" as OutcomeTokens
+note right of OutcomeTokens
+    - Based on ERC-1155 Standard
+    - Created using CTF
+end note
+
+component "Automated Market Maker\n(AMM) Contract" as AMM
+
+component "Collateral Management\nContract" as CollateralManagement
+
+component "Resolution Contract" as Resolution
+
+component "Oracle Integration\nContract" as OracleIntegration
+
+cloud "External Oracles\n(e.g., Chainlink)" as ExternalOracles
+
+component "Governance Contract" as Governance
+
+component "Fee Management\nContract" as FeeManagement
+
+component "Security and Access Control\nContracts" as Security
+
+component "Liquidity Providers\n& Stakeholders" as Stakeholders
+
+' **Grouping of Contracts for Clarity**
+package "Smart Contracts" as SmartContracts {
+    [MarketFactory]
+    [MarketContract]
+    [OutcomeTokens]
+    [AMM]
+    [CollateralManagement]
+    [Resolution]
+    [OracleIntegration]
+    [Governance]
+    [FeeManagement]
+    ' Exclude Security from the package to reduce clutter
+}
+
+' **Connections from User**
+User --> Frontend : Interacts with
+
+' **Frontend Interactions**
+Frontend --> MarketFactory : Create Market
+Frontend --> AMM : Trade Tokens
+Frontend --> Governance : Participate in Governance
+Frontend --> Security : Access Control
+
+' **Market Factory Contract**
+MarketFactory --> MarketContract : Deploys
+
+' **Market Contract Interactions**
+MarketContract --> OutcomeTokens : Creates & Manages
+MarketContract --> AMM : Interfaces for Trading
+MarketContract --> Resolution : Triggers Resolution
+
+' **Outcome Tokens Interactions**
+OutcomeTokens <--> AMM : Trading of Tokens
+OutcomeTokens --> CollateralManagement : Token Redemption
+
+' **AMM Interactions**
+AMM --> CollateralManagement : Manages Collateral
+AMM --> FeeManagement : Sends Fees
+
+' **Collateral Management Interactions**
+CollateralManagement --> Resolution : Releases Collateral upon Resolution
+
+' **Resolution Contract Interactions**
+Resolution --> MarketContract : Updates Market State
+Resolution --> CollateralManagement : Triggers Payouts
+Resolution --> OracleIntegration : Requests Event Outcome
+
+' **Oracle Integration Interactions**
+OracleIntegration --> ExternalOracles : Fetches Data
+ExternalOracles --> OracleIntegration : Provides Outcome Data
+
+' **Governance Interactions**
+Governance --> MarketFactory : Updates Parameters
+Governance --> AMM : Adjusts Fees
+Governance --> FeeManagement : Alters Distribution Rules
+Governance --> Security : Modifies Access Controls
+
+' **Fee Management Interactions**
+FeeManagement --> AMM : Receives Fees
+FeeManagement --> Stakeholders : Distributes Fees
+
+' **Security Interactions**
+' Replaced multiple arrows with a single arrow to the package
+Security --> SmartContracts : Enforces Permissions
+Security <.. Frontend : Provides Access Control
+@enduml
